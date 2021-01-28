@@ -1,0 +1,221 @@
+version: '3.5'
+
+services:
+  mongodb:
+    image: mongodb
+    build: ./Database/
+    container_name: mongodb
+    environment:
+        MONGO_INITDB_ROOT_USERNAME: root
+        MONGO_INITDB_ROOT_PASSWORD: password
+        MONGO_INITDB_DATABASE: admin
+        CLUSTER_ADMIN_USER: root
+        CLUSTER_ADMIN_PW: password
+        API_SERVICE_USER: api-service
+        API_SERVICE_PW: apipassword        
+        API_SERVICE_API_KEY: secrets-api-keys-api-service
+        ADAPTER_SERVICE_USER: adapter-service
+        ADAPTER_SERVICE_PW: adapterpassword       
+        ADAPTER_SERVICE_API_KEY: secrets-api-keys-adapter-service
+        AUTH_SERVICE_USER: auth-service
+        AUTH_SERVICE_PW: authpassword        
+        AUTH_SERVICE_API_KEY: secrets-api-keys-auth-service
+        MAPPING_SERVICE_USER: mapping-service
+        MAPPING_SERVICE_PW: mappingpassword        
+        MAPPING_SERVICE_API_KEY: secrets-api-keys-mapping-service
+        USER_SERVICE_USER: user-service
+        USER_SERVICE_PW: userpassword        
+        USER_SERVICE_API_KEY: secrets-api-keys-user-service
+        APP_ROOT_PW: 9e610c1690d0d556d36b990cf46e647f064789e9aa6699fd15978e34417518b0bca420d6fb6682da26ba51dae25bc69b57a6fede3e4fecaa8ec8cb48648db5dc/e2a741daa9c94fa0c94669b37a15099d
+        APP_ROOT_USER: root@example.com
+    ports:
+      - 27888:27017
+    networks:
+      - ckdac
+    volumes: 
+      - /data/db
+      
+
+  api-service:
+    image: api-service
+    build: ./Api Service/
+    container_name: api-service
+    environment:
+      DB_URL: mongodb://mongodb:27017/api-service
+      DB_USER: api-service
+      DB_PW: apipassword
+      API_KEY: secrets-api-keys-api-service  
+      ACCESS_TOKEN_PATH: /secrets          
+      PORT: "8080"
+      HOST: "0.0.0.0"
+    ports:
+      - 3000:8080
+    links:
+      - mongodb
+    restart: on-failure
+    networks:
+      - ckdac
+    volumes:
+      - ./secrets:/secrets
+
+  api-gateway-ext:
+    image: api-gateway-ext
+    build: ./Api Gateway/
+    container_name: api-gateway-ext
+    environment:
+      TLS_SECRETS_PATH: ../tls
+      MAPPINGS_PATH: '/home/node/routes.json'
+      AUTH_SERVICE_URL: auth-service:8080
+      PORT: "8080"
+      HOST: "0.0.0.0"                  
+      SSL_ENABLED: 'true'
+    ports:
+      - 8443:8080
+    links:
+      - auth-service
+    restart: on-failure
+    networks:
+      - ckdac
+    volumes:
+      - ./routes/routes-external.json:/home/node/routes.json
+
+  api-gateway-int:
+    image: api-gateway-int
+    build: ./Api Gateway/
+    container_name: api-gateway-int
+    environment:
+      MAPPINGS_PATH: '/home/node/routes.json'
+      AUTH_SERVICE_URL: auth-service:8080
+      PORT: "8080"
+      HOST: "0.0.0.0"             
+    ports:
+      - 8444:8080
+    links:
+      - auth-service
+    restart: on-failure
+    networks:
+      - ckdac
+    volumes:
+      - ./routes/routes-internal.json:/home/node/routes.json
+
+  adapter-service:
+    image: adapter-service
+    container_name: adapter-service
+    build: ./Adapter Service/
+    environment:
+      DB_URL: mongodb://mongodb:27017/adapter-service
+      DB_USER: adapter-service
+      DB_PW: adapterpassword
+      API_KEY: secrets-api-keys-adapter-service
+      ACCESS_TOKEN_PATH: /secrets      
+      PORT: "8080"
+      HOST: "0.0.0.0"
+      GATEWAY_INT_URL: http://api-gateway-int:8080 
+    ports:
+      - 3001:8080
+    links:
+      - mongodb
+      - api-service
+      - auth-service
+    restart: on-failure   
+    networks:
+      - ckdac
+    volumes:
+      - ./secrets:/secrets
+
+  auth-service:
+    image: auth-service
+    container_name: auth-service
+    build: ./Auth Service/
+    user: root
+    environment:
+      DB_URL: mongodb://mongodb:27017/auth-service
+      DB_USER: auth-service
+      DB_PW: authpassword
+      API_KEY: secrets-api-keys-auth-service
+      ACCESS_TOKEN_PATH: /secrets     
+      PORT: "8080"
+      HOST: "0.0.0.0"
+      GATEWAY_INT_URL: http://api-gateway-int:8080 
+      AUTH_HOSTNAME: http://api-gateway-int:8080  
+    ports:
+      - 3002:8080
+    links:
+      - mongodb
+    restart: on-failure    
+    networks:
+      - ckdac
+    volumes:
+      - ./secrets:/secrets
+
+  mapping-service:
+    image: mapping-service
+    container_name: mapping-service
+    build: ./Mapping Service/
+    environment:
+      DB_URL: mongodb://mongodb:27017/mapping-service
+      DB_USER: mapping-service
+      DB_PW: mappingpassword
+      API_KEY: secrets-api-keys-mapping-service
+      ACCESS_TOKEN_PATH: /secrets
+      PORT: "8080"
+      HOST: "0.0.0.0"
+    ports:
+      - 3003:8080
+    links:
+      - mongodb
+      - api-service
+      - auth-service
+    restart: on-failure   
+    networks:
+      - ckdac
+    volumes:
+      - ./secrets:/secrets
+
+  user-service:
+    image: user-service
+    container_name: user-service
+    build: ./User Service/
+    environment:
+      DB_URL: mongodb://mongodb:27017/user-service
+      DB_USER: user-service
+      DB_PW: userpassword
+      API_KEY: secrets-api-keys-user-service
+      ACCESS_TOKEN_PATH: /secrets
+      PORT: "8080"
+      HOST: "0.0.0.0"
+    ports:
+      - 3004:8080
+    links:
+      - mongodb
+      - api-service
+      - auth-service
+    restart: on-failure
+    networks:
+      - ckdac
+    volumes:
+      - ./secrets:/secrets
+  
+  frontend:
+    image: frontend
+    build: ./Frontend/
+    container_name: frontend
+    environment:
+      API_URL: https://localhost:8443/api
+      AUTH_URL: https://localhost:8443/auth
+    ports:
+      - 8080:8080
+    links:
+      - mongodb
+      - api-service
+      - auth-service
+      - mapping-service
+      - user-service
+      - adapter-service
+    networks:
+      - ckdac
+
+
+networks:
+  ckdac:
+    name: ckdac
