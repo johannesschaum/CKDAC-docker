@@ -4,7 +4,7 @@
         "hostRegex": false,
         "bypassAuth": false,
         "prefix": "/api/adapters/",
-        "rewrite": "/adapters",
+        "rewrite": "/adapters/",
         "target": "http://adapter-service:8080"
     },
     {
