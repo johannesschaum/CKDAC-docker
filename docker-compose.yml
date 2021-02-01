@@ -30,6 +30,7 @@ services:
         APP_ROOT_USER: root@example.com
     ports:
       - 27888:27017
+    restart: on-failure
     networks:
       - ckdac
     volumes: 
@@ -212,6 +213,7 @@ services:
       - mapping-service
       - user-service
       - adapter-service
+    restart: on-failure
     networks:
       - ckdac
 

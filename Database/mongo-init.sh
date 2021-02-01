@@ -38,7 +38,7 @@ mechanisms: [
 EOF
 
 #!/bin/bash
- set -e
+set -e
 mongo <<EOF
 use admin
 db.auth('$CLUSTER_ADMIN_USER', '$CLUSTER_ADMIN_PW');

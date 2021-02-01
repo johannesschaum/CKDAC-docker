@@ -16,8 +16,8 @@ export const LOG_PATH: string = process.env.LOG_PATH || "";
 export const STORAGE_PATH: string = process.env.STORAGE_PATH || "/tmp/adapter-generator";
 
 //All REST API endpoints are specified here
-export const adapterEndpoint: string = "generate";
-export const fileEndpoint: string = "download";
+export const adapterEndpoint: string = "adapters/generate";
+export const fileEndpoint: string = "adapters/download";
 
 export const apiHost: string = process.env.GATEWAY_INT_URL || "";
 export const apiEndpoint: string = `${apiHost}/apis`;
