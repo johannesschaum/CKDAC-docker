@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@asyncapi/generator": "^1.0.0-rc.11",
-    "adm-zip": "^0.4.16",
+    "adm-zip": "^0.5.2",
     "axios": "^0.18.1",
     "express": "^4.16.1",
     "express-session": "^1.15.6",

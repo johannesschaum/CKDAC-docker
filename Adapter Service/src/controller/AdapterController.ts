@@ -18,7 +18,7 @@ async function createAdapter(req: Request, res: Response, next: NextFunction) {
     if (mapping) {
         try {
             const fileId = await AdapterService.createAdapter(req.params.adapterType, mapping, req.userId);
-
+            
             response = new AdapterResponse(200, undefined, fileId);
         } catch (err) {
             logger.error(err);

@@ -59,6 +59,8 @@ export async function createAdapter(adapterType: AdapterType, mapping: IOpenApiM
         default: throw new Error("Unkown adapter type");
     }
 
+    logger.info("--------OpenApiAdapterService " + filePath+"----");
+
     //Create zip file
     var zip = new Zip();
     zip.addLocalFolder(filePath);
