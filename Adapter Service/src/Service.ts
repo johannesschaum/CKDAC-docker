@@ -149,6 +149,7 @@ export class Service {
             this.express.use(bodyParser.raw());
 
             //Register middleware
+           
             this.express.use(getAuthDetails);
 
             //Register controllers

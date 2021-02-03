@@ -17,7 +17,6 @@ export class DownloadService {
 
   downloadFile(link: string): void {
 
-    console.log("---------------------------------- DOWNLOAD SERVICE LINK---------------------------------------"+link);
     this
       .download(link)
       .subscribe(blob => {
@@ -28,6 +27,6 @@ export class DownloadService {
         a.click();
         URL.revokeObjectURL(objectUrl);
       })
-  }
+  };
 
 }

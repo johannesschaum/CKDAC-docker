@@ -19,11 +19,7 @@ async function serveFile(req: Request, res: Response, next: NextFunction) {
     return;
   }
 
-  logger.info("--------FILE CONTROLLER - Storage path: " + STORAGE_PATH+"----");
-
   const filePath = `${STORAGE_PATH}/${req.userId}/${req.params.fileId}.zip`;
-
-  logger.info("--------FILE CONTROLLER - file PATH: " + filePath+"---");
 
   if (filePath.startsWith('.')) {
     res.sendFile(path.join(__dirname, '../../', filePath));

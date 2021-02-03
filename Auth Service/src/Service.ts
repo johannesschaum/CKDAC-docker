@@ -162,6 +162,7 @@ export class Service {
     private initRoutes(): void {
         if (this.express) {
             this.express.use("*", function (req, res, next) {
+                logger.info(`Incoming request from ${req.originalUrl}`)
                 // Add CORS headers to each request coming directly from the auth service
                 res.header('Access-Control-Allow-Origin', '*');
                 res.header('Access-Control-Allow-Methods', '*');
